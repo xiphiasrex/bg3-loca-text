@@ -20,11 +20,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Resources\Settings1.Designer.cs">
-	    <DesignTimeSharedInput>True</DesignTimeSharedInput>
-	    <AutoGen>True</AutoGen>
-	    <DependentUpon>Settings1.settings</DependentUpon>
-	  </Compile>
 	  <Compile Update="Resources\UserSettings.Designer.cs">
 	    <DesignTimeSharedInput>True</DesignTimeSharedInput>
 	    <AutoGen>True</AutoGen>

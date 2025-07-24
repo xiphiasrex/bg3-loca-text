@@ -5,6 +5,9 @@ using System.Windows.Media;
 
 namespace bg3_loca_text.Core
 {
+	/// <summary>
+	/// https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/how-to-add-a-watermark-to-a-textbox
+	/// </summary>
 	public static class TextBoxHelper
 	{
 		public static string GetPlaceholder(DependencyObject obj) =>
