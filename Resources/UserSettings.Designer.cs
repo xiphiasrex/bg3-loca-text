@@ -25,7 +25,7 @@ namespace bg3_loca_text.Resources {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool IsEscapedModeEnabled {
             get {
                 return ((bool)(this["IsEscapedModeEnabled"]));
