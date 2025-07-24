@@ -27,6 +27,16 @@ namespace bg3_loca_text.Services
 			return _lstagData["ImageTooltips"];
 		}
 
+		public List<string> GetStatTooltips(bool forceReload = false)
+		{
+			if (forceReload || _lstagData.Count == 0)
+			{
+				LoadLSTagDataInternal();
+			}
+
+			return _lstagData["StatTooltips"];
+		}
+
 		private void LoadLSTagDataInternal()
 		{
 			using FileStream stream = File.OpenRead(@"./Resources/LSTagData.json");

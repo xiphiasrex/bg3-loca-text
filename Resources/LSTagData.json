@@ -156,5 +156,11 @@
 		"TutorialTrapDisarmKit",
 		"WarlockSpellSlotPAD",
 		"WarlockSpellSlot"
+	],
+	"StatTooltips": [
+		"ActionResource",
+		"Passive",
+		"Spell",
+		"Status"
 	]
 }

@@ -19,7 +19,7 @@ namespace bg3_loca_text
 		{
 			var services = new ServiceCollection();
 
-			services.AddScoped<IStaticDataLoader, StaticDataLoader>();
+			services.AddSingleton<IStaticDataLoader, StaticDataLoader>();
 
 			return services.BuildServiceProvider();
 		}

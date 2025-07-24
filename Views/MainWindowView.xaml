@@ -4,11 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:bg3_loca_text"
-        xmlns:views="clr-namespace:bg3_loca_text.Views" xmlns:viewmodels="clr-namespace:bg3_loca_text.ViewModels"
+        xmlns:core="clr-namespace:bg3_loca_text.Core"
+        xmlns:views="clr-namespace:bg3_loca_text.Views" 
+        xmlns:viewmodels="clr-namespace:bg3_loca_text.ViewModels"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=viewmodels:MainWindowViewModel}"
         Title="LocaText Tool" 
-        Height="500" Width="800" MinHeight="500" MinWidth="800" >
+        Height="500" Width="1000" MinHeight="500" MinWidth="800" >
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
@@ -54,12 +56,15 @@
                         <Button ToolTip="Add &lt;br&gt; element for a new line" 
                                 Content="New Line" 
                                 Command="{Binding AddLineBreak}" />
-                        <Button ToolTip="Start a block of bold text: &lt;b&gt;My Text&lt;/b&gt;" 
-                                Content="Bold" 
-                                Command="{Binding AddBoldSection}" />
-                        <Button ToolTip="Start a block of italic text: &lt;i&gt;My Text&lt;/i&gt;" 
-                                Content="Italic" 
-                                Command="{Binding AddItalicSection}" />
+
+                        <StackPanel Orientation="Horizontal">
+                            <Button ToolTip="Start a block of bold text: &lt;b&gt;My Text&lt;/b&gt;" 
+                                    Content="Bold" 
+                                    Command="{Binding AddBoldSection}" />
+                                                        <Button ToolTip="Start a block of italic text: &lt;i&gt;My Text&lt;/i&gt;" 
+                                    Content="Italic" 
+                                    Command="{Binding AddItalicSection}" />
+                        </StackPanel>
                         
                         <!-- LSTag Controls -->
                         <Grid>
@@ -67,12 +72,21 @@
                                 <ColumnDefinition Width=".25*" MinWidth="150" />
                                 <ColumnDefinition Width=".75*" />
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0"
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+
+                            <Button Grid.Column="0" Grid.Row="0"
                                     ToolTip="Add LSTag for ActionResource, Spell, Passive, or Status tooltip" 
                                     Content="LSTag (Definition)" 
                                     Command="{Binding AddStatLSTag}" />
-                            <TextBox Grid.Column="1" Width="Auto"
-                                     Text="{Binding StatTooltipString}" />
+                            <ComboBox Grid.Column="1" Grid.Row="0"
+                                      ItemsSource="{Binding StatTooltips}" 
+                                      SelectedItem="{Binding SelectedStatTooltip}"/>
+                            <TextBox Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Height="32"
+                                     Text="{Binding StatTooltipString}" 
+                                     core:TextBoxHelper.Placeholder="ActionResource, Spell, Passive, or Status name" />
                         </Grid>
 
                         <Grid>
@@ -80,13 +94,14 @@
                                 <ColumnDefinition Width=".25*" MinWidth="150" />
                                 <ColumnDefinition Width=".75*" />
                             </Grid.ColumnDefinitions>
+                            
                             <Button Grid.Column="0"
                                     ToolTip="Add LSTag for general tooltip" 
                                     Content="LSTag (General)" 
                                     Command="{Binding AddGeneralLSTag}" />
                             <ComboBox Grid.Column="1" 
                                       ItemsSource="{Binding GeneralTooltips}" 
-                                      SelectedIndex="{Binding SelectedGenTooltip}" />
+                                      SelectedItem="{Binding SelectedGenTooltip}" />
                         </Grid>
 
                         <Grid>
@@ -94,13 +109,14 @@
                                 <ColumnDefinition Width=".25*" MinWidth="150" />
                                 <ColumnDefinition Width=".75*" />
                             </Grid.ColumnDefinitions>
+                            
                             <Button Grid.Column="0"
                                     ToolTip="Add LSTag for tooltip image" 
                                     Content="LSTag (Image)" 
                                     Command="{Binding AddImageLSTag}" />
                             <ComboBox Grid.Column="1"
                                       ItemsSource="{Binding ImageTooltips}" 
-                                      SelectedIndex="{Binding SelectedImageTooltip}"/>
+                                      SelectedItem="{Binding SelectedImageTooltip}"/>
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -116,15 +132,23 @@
                         <TextBlock Grid.Row="0" Margin="5"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"
                                    FontSize="28" Text="Loca Text" />
-                        <Button Grid.Row="0" 
-                                HorizontalAlignment="Right"
-                                ToolTip="Copy Loca Text" 
+                        <Button Grid.Row="0" HorizontalAlignment="Right"
+                                ToolTip="Copy Loca Text (must be valid)"
                                 Content="Copy 📄" 
                                 Command="{Binding CopyLocaText}" />
-                        <TextBox Grid.Row="1" 
-                                 TextWrapping="Wrap" AcceptsReturn="True" SpellCheck.IsEnabled="True" 
-                                 IsInactiveSelectionHighlightEnabled="True"
-                                 Text="{Binding LocaText}" />
+                        <ScrollViewer Grid.Row="1"
+                                      VerticalScrollBarVisibility="Auto">
+                            <TextBox Name="LocaTextBox"
+                                     TextWrapping="Wrap" TextAlignment="Left"
+                                     AcceptsReturn="False"
+                                     Text="{Binding LocaText, UpdateSourceTrigger=PropertyChanged}">
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Enter" Command="{Binding AddLineBreakKey}"/>
+                                    <KeyBinding Modifiers="Ctrl" Key="B" Command="{Binding AddBoldSectionKey}" />
+                                    <KeyBinding Modifiers="Ctrl" Key="I" Command="{Binding AddItalicSectionKey}" />
+                                </TextBox.InputBindings>
+                            </TextBox>
+                        </ScrollViewer>
                     </Grid>
                 </Border>
             </Grid>

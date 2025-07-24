@@ -4,5 +4,6 @@
 	{
 		List<string> GetGeneralTooltips(bool forceReload = false);
 		List<string> GetImageTooltips(bool forceReload = false);
+		List<string> GetStatTooltips(bool forceReload = false);
 	}
 }
