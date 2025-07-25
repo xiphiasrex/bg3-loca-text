@@ -1,6 +1,6 @@
 ﻿# bg3-loca-text
 ### Helper for creating Tooltip Text for Baldur's Gate 3 mods
-![bg3-loca-text](icon.ico)
+![bg3-loca-text](Images/icon.ico)
 
 
 ---

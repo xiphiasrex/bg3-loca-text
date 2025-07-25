@@ -21,7 +21,7 @@
 
 	<ItemGroup>
 	  <Content Include="Core\LocaTextUtils.cs" />
-	  <Content Include="icon.ico" />
+	  <Content Include="Images\icon.ico" />
 	</ItemGroup>
 
 	<ItemGroup>
