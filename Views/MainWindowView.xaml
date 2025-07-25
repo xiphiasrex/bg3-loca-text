@@ -10,25 +10,31 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=viewmodels:MainWindowViewModel}"
         Title="LocaText Tool" 
-        Height="500" Width="1000" MinHeight="500" MinWidth="800" >
+        Height="530" Width="1000" MinHeight="530" MinWidth="800" >
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="20"/>
+            <RowDefinition Height="50"/>
             <RowDefinition />
         </Grid.RowDefinitions>
 
         <!-- Menu bar -->
-        <Border Grid.Row="0" Width="Auto" Height="20">
-            <Menu Width="Auto" Height="20">
-                <MenuItem Header="File">
-                    <MenuItem Header="Exit" />
-                </MenuItem>
-                <MenuItem Header="About" />
+        <DockPanel Grid.Row="0">
+            <Menu DockPanel.Dock="Top">
+                <Menu.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <DockPanel HorizontalAlignment="Stretch"/>
+                    </ItemsPanelTemplate>
+                </Menu.ItemsPanel>
+
+                <MenuItem Header="_GitHub" HorizontalAlignment="Right" 
+                          ToolTip="https://github.com/xiphiasrex/bg3-loca-text/"
+                          Command="{Binding NavigateToGitHub}" />
             </Menu>
-        </Border>
+        </DockPanel>
         
         <!-- Main App Contents -->
-        <Border Grid.Row="1" Width="Auto" Height="Auto">
+        <Border Grid.Row="1" 
+                Width="Auto" Height="Auto" Margin="5,0,5,5">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="360"/>
@@ -85,7 +91,7 @@
                                       ItemsSource="{Binding StatTooltips}" 
                                       SelectedItem="{Binding SelectedStatTooltip}"/>
                             <TextBox Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Height="32"
-                                     Text="{Binding StatTooltipString}" 
+                                     Text="{Binding StatTooltipString, UpdateSourceTrigger=PropertyChanged}" 
                                      core:TextBoxHelper.Placeholder="ActionResource, Spell, Passive, or Status name" />
                         </Grid>
 
@@ -123,7 +129,7 @@
 
                 <!-- Grid for Text editing -->
                 <Border Grid.Column="1" Width="Auto" Height="Auto">
-                    <Grid Margin="5">
+                    <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="50" />
                             <RowDefinition Height="1*" />
@@ -138,7 +144,7 @@
                                 Command="{Binding CopyLocaText}" />
                         <ScrollViewer Grid.Row="1"
                                       VerticalScrollBarVisibility="Auto">
-                            <TextBox Name="LocaTextBox"
+                            <TextBox Name="LocaTextBox" Style="{StaticResource LocaTextBox}"
                                      TextWrapping="Wrap" TextAlignment="Left"
                                      AcceptsReturn="False"
                                      Text="{Binding LocaText, UpdateSourceTrigger=PropertyChanged}">

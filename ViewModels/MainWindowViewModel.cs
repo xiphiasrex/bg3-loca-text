@@ -4,14 +4,24 @@ using bg3_loca_text.Services;
 using bg3_loca_text.Views;
 using Microsoft.Extensions.DependencyInjection;
 using System.ComponentModel.DataAnnotations;
+using System.Windows;
 
 namespace bg3_loca_text.ViewModels
 {
-	internal class MainWindowViewModel([Required] IServiceProvider serviceProvider, IMainWindowView mainWindowView) : ObservableObject
+	internal class MainWindowViewModel : ObservableObject
 	{
 		private const string SELECTION_PLACEHOLDER = "{selection}";
-		private readonly IStaticDataLoader _staticDataLoader = serviceProvider.GetRequiredService<IStaticDataLoader>();
-		private readonly IMainWindowView _mainWindowView = mainWindowView;
+		private readonly IStaticDataLoader _staticDataLoader;
+		private readonly IMainWindowView _mainWindowView;
+
+		public MainWindowViewModel([Required] IServiceProvider serviceProvider, IMainWindowView mainWindowView)
+		{
+			_staticDataLoader = serviceProvider.GetRequiredService<IStaticDataLoader>();
+			_mainWindowView = mainWindowView;
+			SelectedStatTooltip = StatTooltips[0];
+			SelectedGenTooltip = GeneralTooltips[0];
+			SelectedImageTooltip = ImageTooltips[0];
+		}
 
 		#region Properties
 		public bool IsEscapedModeEnabled
@@ -66,9 +76,9 @@ namespace bg3_loca_text.ViewModels
 
 		private string? _locaText;
 
-		public string? LocaText
+		public string LocaText
 		{
-			get { return _locaText; }
+			get { return _locaText ?? ""; }
 			set
 			{
 				_locaText = value;
@@ -116,18 +126,18 @@ namespace bg3_loca_text.ViewModels
 		#region ComboBox Options
 		private List<string>? _generalTooltips;
 
-		public List<string>? GeneralTooltips
+		public List<string> GeneralTooltips
 		{
 			get
 			{
-				_generalTooltips ??= _staticDataLoader.GetGeneralTooltips();
+				_generalTooltips = _staticDataLoader.GetGeneralTooltips();
 				return _generalTooltips;
 			}
 		}
 
 		private List<string>? _imageTooltips;
 
-		public List<string>? ImageTooltips
+		public List<string> ImageTooltips
 		{
 			get
 			{
@@ -138,7 +148,7 @@ namespace bg3_loca_text.ViewModels
 
 		private List<string>? _statTooltips;
 
-		public List<string>? StatTooltips
+		public List<string> StatTooltips
 		{
 			get
 			{
@@ -163,7 +173,13 @@ namespace bg3_loca_text.ViewModels
 		private void ExecuteAddLineBreak(object? obj)
 		{
 			string textToAdd = "<br>";
-			UpdateLocaText(textToAdd, 4, 0);
+
+			if (IsEscapedModeEnabled)
+			{
+				textToAdd = LocaTextUtils.ConvertText(textToAdd);
+			}
+
+			UpdateLocaText(textToAdd, textToAdd.Length, 0);
 		}
 
 		public RelayCommand AddBoldSection => new(ExecuteAddBoldSection);
@@ -172,7 +188,13 @@ namespace bg3_loca_text.ViewModels
 		private void ExecuteAddBoldSection(object? obj)
 		{
 			string textToAdd = $"<b>{SELECTION_PLACEHOLDER}</b>";
-			ReplaceSelectedLocaText(textToAdd, 3);
+
+			if (IsEscapedModeEnabled)
+			{
+				textToAdd = LocaTextUtils.ConvertText(textToAdd);
+			}
+
+			ReplaceSelectedLocaText(textToAdd, textToAdd.IndexOf(SELECTION_PLACEHOLDER));
 		}
 
 		public RelayCommand AddItalicSection => new(ExecuteAddItalicSection);
@@ -181,7 +203,13 @@ namespace bg3_loca_text.ViewModels
 		private void ExecuteAddItalicSection(object? obj)
 		{
 			string textToAdd = $"<i>{SELECTION_PLACEHOLDER}</i>";
-			ReplaceSelectedLocaText(textToAdd, 3);
+
+			if (IsEscapedModeEnabled)
+			{
+				textToAdd = LocaTextUtils.ConvertText(textToAdd);
+			}
+
+			ReplaceSelectedLocaText(textToAdd, textToAdd.IndexOf(SELECTION_PLACEHOLDER));
 		}
 
 		public RelayCommand AddStatLSTag => new(
@@ -193,6 +221,13 @@ namespace bg3_loca_text.ViewModels
 		{
 			string lsTagOpen = $"<LSTag Tooltip=\"{StatTooltipString}\" Type=\"{SelectedStatTooltip}\">";
 			string lsTagClose = "</LSTag>";
+
+			if (IsEscapedModeEnabled)
+			{
+				lsTagOpen = LocaTextUtils.ConvertText(lsTagOpen);
+				lsTagClose = LocaTextUtils.ConvertText(lsTagClose);
+			}
+
 			ReplaceSelectedLocaText(lsTagOpen + SELECTION_PLACEHOLDER + lsTagClose, lsTagOpen.Length);
 		}
 
@@ -204,6 +239,13 @@ namespace bg3_loca_text.ViewModels
 		{
 			string lsTagOpen = $"<LSTag Tooltip=\"{SelectedGenTooltip}\">";
 			string lsTagClose = "</LSTag>";
+
+			if (IsEscapedModeEnabled)
+			{
+				lsTagOpen = LocaTextUtils.ConvertText(lsTagOpen);
+				lsTagClose = LocaTextUtils.ConvertText(lsTagClose);
+			}
+
 			ReplaceSelectedLocaText(lsTagOpen + SELECTION_PLACEHOLDER + lsTagClose, lsTagOpen.Length);
 		}
 
@@ -215,6 +257,13 @@ namespace bg3_loca_text.ViewModels
 		{
 			string lsTagOpen = $"<LSTag Info=\"{SelectedImageTooltip}\" Type=\"Image\">";
 			string lsTagClose = "</LSTag>";
+
+			if (IsEscapedModeEnabled)
+			{
+				lsTagOpen = LocaTextUtils.ConvertText(lsTagOpen);
+				lsTagClose = LocaTextUtils.ConvertText(lsTagClose);
+			}
+
 			ReplaceSelectedLocaText(lsTagOpen + SELECTION_PLACEHOLDER + lsTagClose, lsTagOpen.Length);
 		}
 
@@ -222,42 +271,35 @@ namespace bg3_loca_text.ViewModels
 
 		private void ExecuteCopyLocaText(object? obj)
 		{
-			throw new NotImplementedException();
+			Clipboard.SetText(LocaText);
+		}
+
+		public RelayCommand NavigateToGitHub => new(ExecuteNavigateToGitHub);
+
+		private void ExecuteNavigateToGitHub(object? obj)
+		{
+			var destinationurl = "https://github.com/xiphiasrex/bg3-loca-text/";
+			var sInfo = new System.Diagnostics.ProcessStartInfo(destinationurl)
+			{
+				UseShellExecute = true,
+			};
+			System.Diagnostics.Process.Start(sInfo);
 		}
 		#endregion
 
+		#region private helpers
 		private bool IsLocaTextValid(object? arg)
 		{
-			string checkText = (IsEscapedModeEnabled ? HandleConvertLocaText(false) : LocaText) ?? "";
-
-			int lt = 0;
-			int gt = 0;
-			foreach (char c in checkText)
-			{
-				if (c == '<') lt++;
-				else if (c == '>') gt--;
-
-				if (gt > lt || lt - gt > 1) return false;
-			}
-
-			return lt == gt;
+			return LocaTextUtils.ValidateText(LocaText, IsEscapedModeEnabled);
 		}
 
 		private string HandleConvertLocaText(bool isEscapeMode)
 		{
-			if (isEscapeMode)
-			{
-				return (LocaText ?? "").Replace("<", "&lt;").Replace(">", "&gt;");
-			}
-			else
-			{
-				return (LocaText ?? "").Replace("&lt;", "<").Replace("&gt;", ">");
-			}
+			return LocaTextUtils.ConvertText(LocaText, isEscapeMode);
 		}
 
 		private void UpdateLocaText(string insertionText, int selectionStart, int selectionLength)
 		{
-			LocaText ??= "";
 			int index = _mainWindowView.GetLocaTextCaretPosition();
 			LocaText = LocaText.Insert(index, insertionText);
 			_mainWindowView.SetSelectedLocaText(index + selectionStart, selectionLength);
@@ -265,7 +307,6 @@ namespace bg3_loca_text.ViewModels
 
 		private void ReplaceSelectedLocaText(string insertionText, int selectionStart)
 		{
-			LocaText ??= "";
 			_mainWindowView.GetSelectedLocaText(out int position, out int length);
 			string selectedText = LocaText.Substring(position, length);
 			string tempLoca = LocaText.Remove(position, length);
@@ -273,5 +314,6 @@ namespace bg3_loca_text.ViewModels
 			LocaText = tempLoca.Insert(position, insertionText);
 			_mainWindowView.SetSelectedLocaText(position + selectionStart, selectedText.Length);
 		}
+		#endregion
 	}
 }
