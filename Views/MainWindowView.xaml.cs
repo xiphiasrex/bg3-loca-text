@@ -1,5 +1,6 @@
 ﻿using bg3_loca_text.ViewModels;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace bg3_loca_text.Views
 {
@@ -30,6 +31,40 @@ namespace bg3_loca_text.Views
 		{
 			LocaTextBox.Focus();
 			LocaTextBox.Select(position, length);
+		}
+
+		public void BeginChange()
+		{
+			LocaTextBox.BeginChange();
+		}
+
+		public void EndChange()
+		{
+			LocaTextBox.EndChange();
+		}
+
+		public void FocusGenTooltip()
+		{
+			if (GenComboBox != null && !GenComboBox.IsDropDownOpen)
+			{
+				GenComboBox.IsDropDownOpen = true;
+			}
+		}
+
+		public void FocusImageTooltip()
+		{
+			if (ImageComboBox != null && !ImageComboBox.IsDropDownOpen)
+			{
+				ImageComboBox.IsDropDownOpen = true;
+			}
+		}
+
+		private void ComboBox_GotFocus(object sender, RoutedEventArgs e)
+		{
+			if (sender is ComboBox comboBox && !comboBox.IsDropDownOpen)
+			{
+				comboBox.IsDropDownOpen = true;
+			}
 		}
 	}
 }

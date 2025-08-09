@@ -6,6 +6,7 @@
 ---
 ## Running the exe
 - Requires [.NET 9](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) or newer
+	- For most cases get ".NET Desktop Runtime" version
 - No other dependencies or install needed, just run `bg3-loca-text.exe`
 
 
@@ -223,7 +224,7 @@
 
 ---
 ## Future Features
-- [ ] Fix annoying text re-sizing when changing focus
+- [x] Fix annoying text re-sizing when changing focus
 - [ ] Downloading updates
 - [ ] Support Undo/Redo operations
 
@@ -231,6 +232,11 @@
 ---
 ## Troubleshooting/Known Issues
 ...
+
+
+---
+## Acknowledgements
+- Pyxel ([mod.io profile](https://mod.io/u/notpyxel/)) for providing organized copy of icon images
 
 
 ---

@@ -3,14 +3,19 @@ using bg3_loca_text.Resources;
 using bg3_loca_text.Services;
 using bg3_loca_text.Views;
 using Microsoft.Extensions.DependencyInjection;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Windows;
+using System.Windows.Data;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace bg3_loca_text.ViewModels
 {
 	internal class MainWindowViewModel : ObservableObject
 	{
 		private const string SELECTION_PLACEHOLDER = "{selection}";
+		private const string COMBOBOX_DEFAULT = "Select";
 		private readonly IStaticDataLoader _staticDataLoader;
 		private readonly IMainWindowView _mainWindowView;
 
@@ -21,6 +26,30 @@ namespace bg3_loca_text.ViewModels
 			SelectedStatTooltip = StatTooltips[0];
 			SelectedGenTooltip = GeneralTooltips[0];
 			SelectedImageTooltip = ImageTooltips[0];
+
+			// Set up Filtered view for General Tooltips
+			FilteredGeneralTooltips = CollectionViewSource.GetDefaultView(GeneralTooltips);
+			FilteredGeneralTooltips.Filter = item =>
+			{
+				if (string.IsNullOrEmpty(GenTooltipSearchText) || COMBOBOX_DEFAULT.Equals(GenTooltipSearchText))
+				{
+					return true;
+				}
+				return ((string)item).Contains(GenTooltipSearchText, StringComparison.OrdinalIgnoreCase);
+			};
+			GenTooltipSearchText = COMBOBOX_DEFAULT;
+
+			// Set up Filtered view for Image Tooltips
+			FilteredImageTooltips = CollectionViewSource.GetDefaultView(ImageTooltips);
+			FilteredImageTooltips.Filter = item =>
+			{
+				if (string.IsNullOrEmpty(ImageTooltipSearchText) || COMBOBOX_DEFAULT.Equals(ImageTooltipSearchText))
+				{
+					return true;
+				}
+				return ((ComboBoxIconItemData)item).Name.Contains(ImageTooltipSearchText, StringComparison.OrdinalIgnoreCase);
+			};
+			ImageTooltipSearchText = COMBOBOX_DEFAULT;
 		}
 
 		#region Properties
@@ -98,15 +127,65 @@ namespace bg3_loca_text.ViewModels
 			}
 		}
 
-		private string? _selectedImageTooltip;
+		private string? _genTooltipSearchText;
 
-		public string? SelectedImageTooltip
+		public string? GenTooltipSearchText
+		{
+			get { return _genTooltipSearchText; }
+			set
+			{
+				_genTooltipSearchText = value;
+				OnPropertyChanged();
+				FilteredGeneralTooltips.Refresh();
+
+				if (value == null || GeneralTooltips.Any(item => string.Equals(item, value, StringComparison.OrdinalIgnoreCase)))
+				{
+					_selectedGenTooltip =
+						GeneralTooltips.FirstOrDefault(item => string.Equals(item, value, StringComparison.OrdinalIgnoreCase));
+				}
+				else
+				{
+					_selectedGenTooltip = null;
+				}
+
+				_mainWindowView.FocusGenTooltip();
+			}
+		}
+
+		private ComboBoxIconItemData? _selectedImageTooltip;
+
+		public ComboBoxIconItemData? SelectedImageTooltip
 		{
 			get { return _selectedImageTooltip; }
 			set
 			{
 				_selectedImageTooltip = value;
 				OnPropertyChanged();
+			}
+		}
+
+		private string? _imageTooltipSearchText;
+
+		public string? ImageTooltipSearchText
+		{
+			get { return _imageTooltipSearchText; }
+			set
+			{
+				_imageTooltipSearchText = value;
+				OnPropertyChanged();
+				FilteredImageTooltips.Refresh();
+
+				if (value == null || ImageTooltips.Any(item => string.Equals(item.Name, value, StringComparison.OrdinalIgnoreCase)))
+				{
+					SelectedImageTooltip =
+						ImageTooltips.FirstOrDefault(item => string.Equals(item.Name, value, StringComparison.OrdinalIgnoreCase));
+				}
+				else
+				{
+					SelectedImageTooltip = null;
+				}
+
+				_mainWindowView.FocusImageTooltip();
 			}
 		}
 
@@ -130,21 +209,43 @@ namespace bg3_loca_text.ViewModels
 		{
 			get
 			{
-				_generalTooltips = _staticDataLoader.GetGeneralTooltips();
+				_generalTooltips ??= _staticDataLoader.GetGeneralTooltips();
 				return _generalTooltips;
 			}
 		}
 
-		private List<string>? _imageTooltips;
+		public ICollectionView FilteredGeneralTooltips { get; private set; }
 
-		public List<string> ImageTooltips
+		private List<ComboBoxIconItemData>? _imageTooltips;
+
+		public List<ComboBoxIconItemData> ImageTooltips
 		{
 			get
 			{
-				_imageTooltips ??= _staticDataLoader.GetImageTooltips();
+				if (_imageTooltips == null)
+				{
+					List<string> iconNames = _staticDataLoader.GetImageTooltips();
+
+					_imageTooltips = [.. iconNames.Select(iconName => {
+						BitmapImage myBitmapImage = new();
+						myBitmapImage.BeginInit();
+						myBitmapImage.UriSource = new Uri($"Resources/lstag_icons/INFO_{iconName}.png", UriKind.Relative);
+						myBitmapImage.DecodePixelWidth = 32;
+						myBitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+						myBitmapImage.EndInit();
+
+						return new ComboBoxIconItemData() {
+							Name = iconName,
+							Icon = myBitmapImage
+						};
+					})];
+				}
+
 				return _imageTooltips;
 			}
 		}
+
+		public ICollectionView FilteredImageTooltips { get; private set; }
 
 		private List<string>? _statTooltips;
 
@@ -233,7 +334,7 @@ namespace bg3_loca_text.ViewModels
 
 		public RelayCommand AddGeneralLSTag => new(
 			ExecuteAddGeneralLSTag,
-			canExecute => !string.IsNullOrEmpty(SelectedGenTooltip));
+			canExecute => !string.IsNullOrEmpty(SelectedGenTooltip) && GeneralTooltips.Contains(SelectedGenTooltip));
 
 		private void ExecuteAddGeneralLSTag(object? obj)
 		{
@@ -251,20 +352,18 @@ namespace bg3_loca_text.ViewModels
 
 		public RelayCommand AddImageLSTag => new(
 			ExecuteAddImageLSTag,
-			canExecute => !string.IsNullOrEmpty(SelectedImageTooltip));
+			canExecute => SelectedImageTooltip != null && !string.IsNullOrEmpty(SelectedImageTooltip.Name));
 
 		private void ExecuteAddImageLSTag(object? obj)
 		{
-			string lsTagOpen = $"<LSTag Info=\"{SelectedImageTooltip}\" Type=\"Image\">";
-			string lsTagClose = "</LSTag>";
+			string textToAdd = $"<LSTag Type=\"Image\" Info=\"{SelectedImageTooltip?.Name}\"/>";
 
 			if (IsEscapedModeEnabled)
 			{
-				lsTagOpen = LocaTextUtils.ConvertText(lsTagOpen);
-				lsTagClose = LocaTextUtils.ConvertText(lsTagClose);
+				textToAdd = LocaTextUtils.ConvertText(textToAdd);
 			}
 
-			ReplaceSelectedLocaText(lsTagOpen + SELECTION_PLACEHOLDER + lsTagClose, lsTagOpen.Length);
+			UpdateLocaText(textToAdd, textToAdd.Length, 0);
 		}
 
 		public RelayCommand CopyLocaText => new(ExecuteCopyLocaText, IsLocaTextValid);
@@ -315,5 +414,11 @@ namespace bg3_loca_text.ViewModels
 			_mainWindowView.SetSelectedLocaText(position + selectionStart, selectedText.Length);
 		}
 		#endregion
+	}
+
+	internal class ComboBoxIconItemData()
+	{
+		public required string Name { get; set; }
+		public required ImageSource Icon { get; set; }
 	}
 }
