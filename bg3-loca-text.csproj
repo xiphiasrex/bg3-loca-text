@@ -9,8 +9,10 @@
 		<UseWPF>true</UseWPF>
 		<ApplicationIcon>Images\icon.ico</ApplicationIcon>
 		<PackageReadmeFile></PackageReadmeFile>
-		<FileVersion>0.1a</FileVersion>
+		<FileVersion>0.2.1</FileVersion>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<Title>LocaText</Title>
+		<AssemblyVersion>0.2.1</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>

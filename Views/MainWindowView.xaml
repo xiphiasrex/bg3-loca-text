@@ -119,8 +119,8 @@
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width=".25*" MinWidth="150" />
-                                <ColumnDefinition Width=".10*" MinWidth="32" />
-                                <ColumnDefinition Width=".65*" />
+                                <ColumnDefinition Width=".05*" MinWidth="32" />
+                                <ColumnDefinition Width=".70*" />
                             </Grid.ColumnDefinitions>
                             
                             <Button Grid.Column="0"
@@ -139,10 +139,20 @@
                                       IsEditable="True" StaysOpenOnEdit="True" >
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Image Source="{Binding Icon}" Width="32" Height="32" Margin="0,0,10,0" ClipToBounds="True"/>
-                                            <Label Content="{Binding Name}" Height="32" VerticalContentAlignment="Center" />
-                                        </StackPanel>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width=".15*" MinWidth="32" />
+                                                <ColumnDefinition Width=".85*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Image Source="{Binding Icon}" 
+                                                   Margin="0,0,10,0"
+                                                   Grid.Column="0"
+                                                   ClipToBounds="True" IsHitTestVisible="True"/>
+                                            <Label Content="{Binding Name}" 
+                                                   Grid.Column="1"
+                                                   VerticalContentAlignment="Center"
+                                                   IsHitTestVisible="True"/>
+                                        </Grid>
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
