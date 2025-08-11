@@ -320,7 +320,7 @@ namespace bg3_loca_text.ViewModels
 
 		private void ExecuteAddStatLSTag(object? obj)
 		{
-			string lsTagOpen = $"<LSTag Tooltip=\"{StatTooltipString}\" Type=\"{SelectedStatTooltip}\">";
+			string lsTagOpen = $"<LSTag Type=\"{SelectedStatTooltip}\" Tooltip=\"{StatTooltipString}\">";
 			string lsTagClose = "</LSTag>";
 
 			if (IsEscapedModeEnabled)
